@@ -30,15 +30,15 @@ const props = defineProps<{ product: Product }>();
 const activeImage = ref(props.product.images[0] ?? props.product.image);
 const adding = ref<number | null>(null);
 
-const { addToCart: cartAdd } = useCart();
+const { addToCart } = useCart();
 
 function variantLabel(variant: Variant): string {
     return variant.options.map(o => o.value).join(', ') || variant.sku;
 }
 
-function addToCart(variantId: number) {
+function handleAddToCart(variantId: number) {
     adding.value = variantId;
-    cartAdd(variantId, 1, { onFinish: () => { adding.value = null; } });
+    addToCart(variantId, 1, () => { adding.value = null; });
 }
 </script>
 
@@ -104,7 +104,7 @@ function addToCart(variantId: number) {
                                 <div class="flex items-center gap-4">
                                     <span class="font-semibold">{{ variant.price }}</span>
                                     <button
-                                        @click="addToCart(variant.id)"
+                                        @click="handleAddToCart(variant.id)"
                                         :disabled="adding === variant.id"
                                         class="bg-black text-white text-sm px-4 py-2 rounded transition-opacity"
                                         :class="adding === variant.id ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'"

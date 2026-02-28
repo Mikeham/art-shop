@@ -17,11 +17,28 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface CartLine {
+    id: number;
+    quantity: number;
+    unit_price: string;
+    sub_total: string;
+    product_name: string;
+    variant_label: string;
+    image: string;
+}
+
+export interface CartData {
+    total: string;
+    item_count: number;
+    lines: CartLine[];
+}
+
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    cart: CartData | null;
 };
 
 export interface User {
