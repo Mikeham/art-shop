@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useCart } from '@/composables/useCart';
 import GuestLayout from '@/layouts/GuestLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 interface VariantOption {
     option: string;
@@ -31,6 +31,7 @@ const activeImage = ref(props.product.images[0] ?? props.product.image);
 const adding = ref<number | null>(null);
 
 const { addToCart } = useCart();
+const cartError = computed(() => (usePage().props.errors as Record<string, string>).cart ?? null);
 
 function variantLabel(variant: Variant): string {
     return variant.options.map(o => o.value).join(', ') || variant.sku;
@@ -89,6 +90,10 @@ function handleAddToCart(variantId: number) {
                         <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">
                             Available options
                         </h2>
+
+                        <p v-if="cartError" class="mb-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                                {{ cartError }}
+                            </p>
 
                         <div class="flex flex-col gap-3">
                             <div

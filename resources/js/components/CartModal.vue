@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { useCart } from '@/composables/useCart';
+import { usePage } from '@inertiajs/vue3';
 import { X, Minus, Plus, Trash2 } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 const { cart, cartOpen, closeCart, removeFromCart, updateQuantity } = useCart();
+
+const cartError = computed(() => (usePage().props.errors as Record<string, string>).cart ?? null);
 </script>
 
 <template>
@@ -37,6 +41,11 @@ const { cart, cartOpen, closeCart, removeFromCart, updateQuantity } = useCart();
 
                         <!-- Content -->
                         <div class="flex-1 overflow-y-auto px-6 py-4">
+                            <!-- Stock error -->
+                            <p v-if="cartError" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                                {{ cartError }}
+                            </p>
+
                             <!-- Empty state -->
                             <div
                                 v-if="!cart || cart.lines.length === 0"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Lunar\Exceptions\Carts\CartException;
 use Lunar\Facades\CartSession;
 use Lunar\Models\ProductVariant;
 
@@ -17,7 +18,23 @@ class CartController extends Controller
 
         $variant = ProductVariant::find($data['variant_id']);
 
-        CartSession::add($variant, $data['quantity']);
+        $existingQty = 0;
+        if ($cart = CartSession::current(calculate: false)) {
+            $existingQty = $cart->lines
+                ->where('purchasable_type', $variant->getMorphClass())
+                ->where('purchasable_id', $variant->id)
+                ->sum('quantity');
+        }
+
+        if (! $variant->canBeFulfilledAtQuantity($existingQty + $data['quantity'])) {
+            return back()->withErrors(['cart' => 'Item is not available at this quantity.']);
+        }
+
+        try {
+            CartSession::add($variant, $data['quantity']);
+        } catch (CartException $e) {
+            return back()->withErrors(['cart' => $e->getMessage()]);
+        }
 
         return back();
     }
@@ -35,7 +52,11 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        CartSession::updateLine($cartLineId, $data['quantity']);
+        try {
+            CartSession::updateLine($cartLineId, $data['quantity']);
+        } catch (CartException $e) {
+            return back()->withErrors(['cart' => $e->getMessage()]);
+        }
 
         return back();
     }
