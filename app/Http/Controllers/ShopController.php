@@ -22,11 +22,26 @@ class ShopController extends Controller
     public function show(string $slug)
     {
         $product = Product::whereHas('urls', fn ($q) => $q->where('slug', $slug)->where('default', true))
-            ->with(['defaultUrl', 'thumbnail', 'variants.prices.currency'])
+            ->with(['defaultUrl', 'thumbnail', 'media', 'variants.prices.currency', 'variants.values.option'])
             ->firstOrFail();
 
         return Inertia::render('ProductShow', [
-            'product' => new ProductResource($product)
+            'product' => [
+                'id'          => $product->id,
+                'name'        => $product->translateAttribute('name') ?? '',
+                'description' => $product->translateAttribute('description') ?? '',
+                'image'       => $product->getThumbnailImage(),
+                'images'      => $product->media->map(fn ($m) => $m->getUrl('medium'))->values(),
+                'variants'    => $product->variants->map(fn ($variant) => [
+                    'id'      => $variant->id,
+                    'sku'     => $variant->sku,
+                    'price'   => $variant->prices->first()?->price->formatted ?? '',
+                    'options' => $variant->values->map(fn ($v) => [
+                        'option' => $v->option->translate('name'),
+                        'value'  => $v->translate('name'),
+                    ])->values(),
+                ])->values(),
+            ],
         ]);
     }
 }
