@@ -11,10 +11,7 @@ Route::get('/', function () {
 
 Route::get('gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('shop', [ShopController::class, 'list'])->name('shop');
-
-//Route::get('shop', function () {
-//    return Inertia::render('Shop');
-//})->name('shop');
+Route::get('shop/{slug}', [ShopController::class, 'show'])->name('shop.product');
 
 Route::get('commissions', function () {
     return Inertia::render('Commissions');
