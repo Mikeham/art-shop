@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CartModal from '@/components/CartModal.vue';
 import GuestHeader from '@/components/GuestHeader.vue';
 
 
@@ -21,5 +22,7 @@ defineProps<{
                 </div>
             </main>
         </div>
+
+        <CartModal />
     </div>
 </template>

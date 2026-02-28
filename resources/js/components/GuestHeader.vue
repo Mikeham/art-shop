@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCart } from '@/composables/useCart';
 import { toUrl, urlIsActive } from '@/lib/utils';
 
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
-import { Menu } from 'lucide-vue-next';
+import { Menu, ShoppingCart } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -59,6 +60,7 @@ const mainNavItems: NavItem[] = [
 
 const rightNavItems: NavItem[] = [];
 
+const { itemCount, openCart } = useCart();
 </script>
 
 <template>
@@ -136,6 +138,16 @@ const rightNavItems: NavItem[] = [];
 
                 <div class="ml-auto flex items-center space-x-2">
                     <div class="relative flex items-center space-x-1">
+                        <button
+                            @click="openCart"
+                            class="relative flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent transition-colors"
+                        >
+                            <ShoppingCart class="h-5 w-5" />
+                            <span
+                                v-if="itemCount > 0"
+                                class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white"
+                            >{{ itemCount }}</span>
+                        </button>
 <!--                        <Button variant="ghost" size="icon" class="group h-9 w-9 cursor-pointer">-->
 <!--                            <Search class="size-5 opacity-80 group-hover:opacity-100 text-black group-hover:text-white" />-->
 <!--                        </Button>-->

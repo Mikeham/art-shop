@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCart } from '@/composables/useCart';
 import GuestLayout from '@/layouts/GuestLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -27,9 +28,17 @@ interface Product {
 const props = defineProps<{ product: Product }>();
 
 const activeImage = ref(props.product.images[0] ?? props.product.image);
+const adding = ref<number | null>(null);
+
+const { addToCart: cartAdd } = useCart();
 
 function variantLabel(variant: Variant): string {
     return variant.options.map(o => o.value).join(', ') || variant.sku;
+}
+
+function addToCart(variantId: number) {
+    adding.value = variantId;
+    cartAdd(variantId, 1, { onFinish: () => { adding.value = null; } });
 }
 </script>
 
@@ -95,10 +104,12 @@ function variantLabel(variant: Variant): string {
                                 <div class="flex items-center gap-4">
                                     <span class="font-semibold">{{ variant.price }}</span>
                                     <button
-                                        disabled
-                                        class="bg-black text-white text-sm px-4 py-2 rounded opacity-50 cursor-not-allowed"
+                                        @click="addToCart(variant.id)"
+                                        :disabled="adding === variant.id"
+                                        class="bg-black text-white text-sm px-4 py-2 rounded transition-opacity"
+                                        :class="adding === variant.id ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'"
                                     >
-                                        Add to cart
+                                        {{ adding === variant.id ? 'Adding…' : 'Add to cart' }}
                                     </button>
                                 </div>
                             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Lunar\Facades\CartSession;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -46,6 +47,42 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'cart' => $this->getCartData(),
         ];
+    }
+
+    private function getCartData(): ?array
+    {
+        try {
+            $cart = CartSession::current(calculate: false);
+
+            if (! $cart) {
+                return null;
+            }
+
+            $cart->calculate();
+
+            $lines = $cart->lines->map(function ($line) {
+                $purchasable = $line->purchasable;
+
+                return [
+                    'id' => $line->id,
+                    'quantity' => $line->quantity,
+                    'unit_price' => $line->unitPrice?->formatted(),
+                    'sub_total' => $line->subTotal?->formatted(),
+                    'product_name' => $purchasable?->product?->translateAttribute('name'),
+                    'variant_label' => $purchasable?->getOption(),
+                    'image' => $purchasable?->getThumbnailImage(),
+                ];
+            })->values()->all();
+
+            return [
+                'total' => $cart->total?->formatted(),
+                'item_count' => $cart->lines->sum('quantity'),
+                'lines' => $lines,
+            ];
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }
