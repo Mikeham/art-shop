@@ -1,32 +1,155 @@
 <script setup lang="ts">
 import GuestLayout from '@/layouts/GuestLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
+interface FeaturedProduct {
+    id: number;
+    name: string;
+    thumbnail: string;
+    slug: string | null;
+    price: string;
+}
+
+defineProps<{ featured: FeaturedProduct[] }>();
 </script>
 
 <template>
     <Head title="Home" />
 
-    <GuestLayout title="home" description="Home Page">
-        <div class="grid grid-cols-1 justify-center">
+    <GuestLayout :full-width="true">
 
-            <img alt="test" src="https://blocks.astratic.com/img/general-img-landscape.png" style="height:600px;" class="mx-auto my-2"/>
+        <!-- ─── Hero ─────────────────────────────────────────────── -->
+        <section class="relative flex items-center justify-center min-h-[92vh] overflow-hidden" style="background: linear-gradient(135deg, #6b2737 0%, #a84a5a 40%, #c46b72 70%, #8b3a4a 100%)">
+            <!-- Subtle grid texture overlay -->
+            <div class="absolute inset-0 opacity-10"
+                 style="background-image: radial-gradient(circle, #ffffff 1px, transparent 1px); background-size: 32px 32px;" />
 
-            <p class="mt-1">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris blandit nec orci eu tincidunt. Pellentesque accumsan efficitur ligula, vitae malesuada sem fringilla sed. In facilisis dictum diam a tristique. Donec pharetra tristique vulputate. In vitae facilisis lorem. Phasellus porta egestas sem sit amet consectetur. Praesent varius mi id feugiat tempor. Praesent dapibus turpis elit, et feugiat metus convallis sed. Aenean condimentum facilisis velit vel porta. Nulla quis nulla libero. Sed pretium laoreet libero.
-            </p>
-            <p class="mt-1">
-                Curabitur sodales, libero feugiat consectetur commodo, urna magna consequat odio, eget dignissim ex erat vehicula purus. Mauris elementum, magna quis semper tempor, tellus ipsum molestie arcu, a facilisis orci sapien hendrerit sapien. Nullam sagittis, lorem a scelerisque tincidunt, ligula eros venenatis massa, eget euismod metus mi eget tortor. Duis varius dignissim lacus ornare varius. Maecenas in ligula eu diam aliquet suscipit. Mauris nec ullamcorper tortor. Fusce maximus urna eu velit congue, vel aliquam mauris viverra. Pellentesque et dolor velit. In et dui lectus. Cras in felis mi. Mauris tempus bibendum ipsum. Proin fermentum, tellus hendrerit finibus finibus, arcu diam finibus neque, non venenatis metus metus ullamcorper mauris. Cras nec placerat mi. Phasellus non sollicitudin magna, a viverra turpis. Mauris rhoncus scelerisque nulla, a fringilla tellus blandit sit amet.
-            </p>
-            <p class="mt-1">
-                Pellentesque ultrices est a lectus rhoncus sagittis. In sed facilisis mi, id aliquet erat. Ut at turpis a nibh tempor sagittis vitae a velit. Suspendisse semper eget turpis at accumsan. In at cursus elit. Phasellus leo ligula, ultrices finibus dolor in, sagittis laoreet felis. Nam in elit consequat quam bibendum dapibus. Integer sagittis ut nisl eu porttitor. Proin fermentum ac elit eget ornare. Praesent sit amet justo dictum est varius laoreet.
-            </p>
-            <p class="mt-1">
-                Suspendisse potenti. Duis nec aliquet nulla. In placerat aliquet ipsum vitae sagittis. Cras faucibus lacinia venenatis. Donec non viverra augue. Cras pharetra ornare diam, et congue sapien varius at. Nunc lorem nisl, dapibus eu elementum eget, venenatis ut augue. Sed sed nibh a dui dignissim blandit non vitae elit. Sed orci nibh, hendrerit vitae velit sed, posuere malesuada ex.
-            </p>
-            <p class="mt-1">
-                Aliquam at interdum mi, in varius mi. Sed ante eros, tristique vel magna tempor, vehicula dictum nisi. Vivamus orci turpis, placerat vel mi sit amet, rhoncus elementum lorem. Pellentesque malesuada neque non laoreet pretium. Sed vehicula semper tortor vitae mattis. Sed egestas rhoncus egestas. Aliquam et lobortis libero. Donec eu consectetur tortor.
-            </p>
-        </div>
+            <!-- Soft gradient blobs -->
+            <div class="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-rose-300/20 blur-[120px]" />
+            <div class="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-pink-200/15 blur-[120px]" />
+
+            <div class="relative z-10 text-center px-6 max-w-3xl mx-auto">
+                <p class="text-rose-300 tracking-[0.3em] text-sm uppercase font-medium mb-4">Original Artworks</p>
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+                    Art That Speaks<br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-pink-300">
+                        for Itself
+                    </span>
+                </h1>
+                <p class="text-white/75 text-lg sm:text-xl mb-10 leading-relaxed">
+                    Prints, originals, and custom commissions — each piece made with care.
+                </p>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <Link
+                        href="/shop"
+                        class="px-8 py-3 rounded-full bg-white text-gray-900 font-semibold text-sm hover:bg-gray-100 transition-colors"
+                    >
+                        Shop Now
+                    </Link>
+                    <Link
+                        href="/gallery"
+                        class="px-8 py-3 rounded-full border border-white/30 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                    >
+                        View Gallery
+                    </Link>
+                </div>
+            </div>
+
+            <!-- Scroll hint -->
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/50 text-xs tracking-widest uppercase">
+                <span>Scroll</span>
+                <div class="w-px h-8 bg-white/40 animate-pulse" />
+            </div>
+        </section>
+
+        <!-- ─── Featured Works ────────────────────────────────────── -->
+        <section class="bg-gray-100 py-20 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-end justify-between mb-10">
+                    <div>
+                        <p class="text-xs tracking-[0.25em] uppercase text-gray-400 font-medium mb-1">Selected works</p>
+                        <h2 class="text-3xl font-bold text-gray-900">Featured Pieces</h2>
+                    </div>
+                    <Link href="/shop" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
+                        See all &rarr;
+                    </Link>
+                </div>
+
+                <div v-if="featured.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Link
+                        v-for="product in featured"
+                        :key="product.id"
+                        :href="product.slug ? `/shop/${product.slug}` : '/shop'"
+                        class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow"
+                    >
+                        <div class="aspect-square overflow-hidden bg-gray-100">
+                            <img
+                                v-if="product.thumbnail"
+                                :src="product.thumbnail"
+                                :alt="product.name"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div v-else class="w-full h-full flex items-center justify-center text-gray-300 text-sm">
+                                No image
+                            </div>
+                        </div>
+                        <div class="p-5 flex items-center justify-between">
+                            <p class="font-semibold text-gray-900">{{ product.name }}</p>
+                            <p class="text-sm font-medium text-gray-500">{{ product.price }}</p>
+                        </div>
+                    </Link>
+                </div>
+
+                <div class="mt-8 text-center sm:hidden">
+                    <Link href="/shop" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+                        See all &rarr;
+                    </Link>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Commissions ───────────────────────────────────────── -->
+        <section class="bg-gray-900 py-20 px-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10"
+                 style="background-image: radial-gradient(circle, #ffffff 1px, transparent 1px); background-size: 32px 32px;" />
+            <div class="absolute top-0 right-0 w-96 h-96 rounded-full bg-rose-500/20 blur-[100px]" />
+
+            <div class="relative max-w-3xl mx-auto text-center">
+                <p class="text-xs tracking-[0.25em] uppercase text-rose-300 font-medium mb-3">Made for you</p>
+                <h2 class="text-4xl font-bold text-white mb-5">Custom Commissions</h2>
+                <p class="text-gray-400 text-lg leading-relaxed mb-10">
+                    Want something unique? I take on a limited number of commissions each month — portraits,
+                    fan art, and more. Get in touch to discuss your idea.
+                </p>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <Link
+                        href="/commissions"
+                        class="px-8 py-3 rounded-full bg-rose-500 hover:bg-rose-400 text-white font-semibold text-sm transition-colors"
+                    >
+                        Learn More
+                    </Link>
+                    <Link
+                        href="/contact"
+                        class="px-8 py-3 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                    >
+                        Get in Touch
+                    </Link>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Footer strip ─────────────────────────────────────── -->
+        <section class="bg-gray-100 border-t border-gray-200 py-10 px-6">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+                <p>&copy; {{ new Date().getFullYear() }} — All rights reserved.</p>
+                <nav class="flex gap-6">
+                    <Link href="/gallery" class="hover:text-gray-900 transition-colors">Gallery</Link>
+                    <Link href="/shop" class="hover:text-gray-900 transition-colors">Shop</Link>
+                    <Link href="/commissions" class="hover:text-gray-900 transition-colors">Commissions</Link>
+                    <Link href="/contact" class="hover:text-gray-900 transition-colors">Contact</Link>
+                </nav>
+            </div>
+        </section>
+
     </GuestLayout>
 </template>

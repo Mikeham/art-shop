@@ -6,6 +6,7 @@ import GuestHeader from '@/components/GuestHeader.vue';
 defineProps<{
     title?: string;
     description?: string;
+    fullWidth?: boolean;
 }>();
 
 </script>
@@ -17,7 +18,7 @@ defineProps<{
 
             <!-- Page Content -->
             <main>
-                <div class="container mx-auto text-black">
+                <div :class="fullWidth ? 'text-black' : 'container mx-auto text-black'">
                     <slot />
                 </div>
             </main>

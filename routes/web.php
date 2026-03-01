@@ -2,14 +2,14 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Home');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('shop', [ShopController::class, 'list'])->name('shop');
@@ -29,9 +29,8 @@ Route::get('commissions', function () {
     return Inertia::render('Commissions');
 })->name('commissions');
 
-Route::get('contact', function () {
-    return Inertia::render('Contact');
-})->name('contact');
+Route::get( 'contact', [ContactController::class, 'show'])->name('contact');
+Route::post('contact', [ContactController::class, 'send'])->name('contact.send');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
