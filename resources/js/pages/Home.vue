@@ -107,6 +107,32 @@ defineProps<{ featured: FeaturedProduct[] }>();
             </div>
         </section>
 
+        <!-- ─── About ─────────────────────────────────────────────── -->
+        <section class="bg-white px-6 py-20">
+            <div class="mx-auto max-w-3xl">
+                <p class="mb-1 text-xs font-medium tracking-[0.25em] text-gray-400 uppercase">The artist</p>
+                <h2 class="mb-8 text-3xl font-bold text-gray-900">A little about me</h2>
+
+                <div class="space-y-5 text-base leading-relaxed text-gray-600">
+                    <p>
+                        I am a self taught artist who has dabbled in various art forms over the years. During the pandemic painting and creating
+                        came back into my life, and really helped create a space of joy by filling up my home with colourful pieces of art.
+                    </p>
+                    <p>
+                        For me this continues to be a source of joy in my life around my disabilities, and brings in little bits of the world
+                        I'm at times unable to access — cows from the highlands of Scotland, whale sharks in the seas of the Galapagos and
+                        adorable pets from across the globe.
+                    </p>
+                    <p>I hope that my work gives you the same sense of joy and freedom in your home!</p>
+                    <p>
+                        I use various mediums such as metal and fabric, which you can find on the "kink in my armour" tab, but mainly work with
+                        acrylic paints for pet portraits, glow in the dark paintings, landscapes and anything that takes my ADHD creative fancy.
+                    </p>
+                    <p>Please feel free to reach out to learn more about my original works and commissions, and I'll be happy to help!</p>
+                </div>
+            </div>
+        </section>
+
         <!-- ─── Commissions ───────────────────────────────────────── -->
         <section class="relative overflow-hidden bg-gray-900 px-6 py-20">
             <div
