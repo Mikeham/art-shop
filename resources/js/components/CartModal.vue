@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCart } from '@/composables/useCart';
-import { usePage } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { X, Minus, Plus, Trash2 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -118,6 +118,13 @@ const cartError = computed(() => (usePage().props.errors as Record<string, strin
                                 <span>Total</span>
                                 <span>{{ cart.total }}</span>
                             </div>
+                            <Link
+                                href="/checkout"
+                                @click="closeCart"
+                                class="block w-full rounded-lg bg-black py-2.5 text-center text-sm font-medium text-white hover:opacity-80 transition-opacity"
+                            >
+                                Checkout
+                            </Link>
                             <button
                                 @click="closeCart"
                                 class="w-full rounded-lg border border-black py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
