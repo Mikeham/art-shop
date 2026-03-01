@@ -196,5 +196,11 @@ class CheckoutController extends Controller
             'card_type' => 'card',
             'meta'      => ['stripe_session_id' => $session->id],
         ]);
+
+        foreach ($order->lines as $line) {
+            if ($line->purchasable instanceof \Lunar\Models\ProductVariant) {
+                $line->purchasable->decrement('stock', $line->quantity);
+            }
+        }
     }
 }

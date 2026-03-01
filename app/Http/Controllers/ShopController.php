@@ -33,10 +33,11 @@ class ShopController extends Controller
                 'image'       => $product->getThumbnailImage(),
                 'images'      => $product->media->map(fn ($m) => $m->getUrl('medium'))->values(),
                 'variants'    => $product->variants->map(fn ($variant) => [
-                    'id'      => $variant->id,
-                    'sku'     => $variant->sku,
-                    'price'   => $variant->prices->first()?->price->formatted ?? '',
-                    'options' => $variant->values->map(fn ($v) => [
+                    'id'       => $variant->id,
+                    'sku'      => $variant->sku,
+                    'price'    => $variant->prices->first()?->price->formatted ?? '',
+                    'in_stock' => $variant->canBeFulfilledAtQuantity(1),
+                    'options'  => $variant->values->map(fn ($v) => [
                         'option' => $v->option->translate('name'),
                         'value'  => $v->translate('name'),
                     ])->values(),

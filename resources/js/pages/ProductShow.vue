@@ -13,6 +13,7 @@ interface Variant {
     id: number;
     sku: string;
     price: string;
+    in_stock: boolean;
     options: VariantOption[];
 }
 
@@ -110,11 +111,15 @@ function handleAddToCart(variantId: number) {
                                     <span class="font-semibold">{{ variant.price }}</span>
                                     <button
                                         @click="handleAddToCart(variant.id)"
-                                        :disabled="adding === variant.id"
-                                        class="bg-black text-white text-sm px-4 py-2 rounded transition-opacity"
-                                        :class="adding === variant.id ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'"
+                                        :disabled="!variant.in_stock || adding === variant.id"
+                                        class="text-sm px-4 py-2 rounded transition-opacity"
+                                        :class="!variant.in_stock
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : adding === variant.id
+                                                ? 'bg-black text-white opacity-50 cursor-not-allowed'
+                                                : 'bg-black text-white hover:opacity-80'"
                                     >
-                                        {{ adding === variant.id ? 'Adding…' : 'Add to cart' }}
+                                        {{ !variant.in_stock ? 'Sold out' : adding === variant.id ? 'Adding…' : 'Add to cart' }}
                                     </button>
                                 </div>
                             </div>
