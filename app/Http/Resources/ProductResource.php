@@ -17,11 +17,12 @@ class ProductResource extends JsonResource
         $price = $this->variants->first()?->prices->first();
 
         return [
-            'id' => $this->id,
-            'name' => $this->translateAttribute('name') ?? '',
-            'image' => $this->getThumbnailImage(),
-            'price' => $price?->price->formatted ?? '',
-            'slug' => $this->defaultUrl?->slug,
+            'id'       => $this->id,
+            'name'     => $this->translateAttribute('name') ?? '',
+            'image'    => $this->getThumbnailImage(),
+            'price'    => $price?->price->formatted ?? '',
+            'slug'     => $this->defaultUrl?->slug,
+            'in_stock' => $this->variants->some(fn ($v) => $v->canBeFulfilledAtQuantity(1)),
         ];
     }
 }

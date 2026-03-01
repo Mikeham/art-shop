@@ -9,6 +9,7 @@ interface Product {
     image: string;
     price: string;
     slug: string | null;
+    in_stock: boolean;
 }
 
 defineProps<{ products: Product[] }>();
@@ -47,14 +48,22 @@ defineProps<{ products: Product[] }>();
                         :key="product.id"
                         class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-xl"
                     >
-                        <div class="aspect-square overflow-hidden bg-gray-100">
+                        <div class="relative aspect-square overflow-hidden bg-gray-100">
                             <img
                                 v-if="product.image"
                                 :src="product.image"
                                 :alt="product.name"
                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                :class="!product.in_stock ? 'opacity-40 grayscale' : ''"
                             />
                             <div v-else class="flex h-full w-full items-center justify-center text-sm text-gray-300">No image</div>
+                            <div
+                                v-if="!product.in_stock"
+                                class="absolute top-0 left-0 right-0 py-4 text-center text-xs font-bold tracking-widest text-white uppercase"
+                                style="background: linear-gradient(135deg, #6b2737 0%, #a84a5a 50%, #c46b72 100%)"
+                            >
+                                Sold Out
+                            </div>
                         </div>
 
                         <div class="flex flex-1 flex-col p-5">

@@ -20,6 +20,7 @@ class HomeController extends Controller
                 'thumbnail' => $product->getThumbnailImage(),
                 'slug'      => $product->defaultUrl?->slug,
                 'price'     => $product->variants->first()?->prices->first()?->price->formatted ?? '',
+                'in_stock'  => $product->variants->some(fn ($v) => $v->canBeFulfilledAtQuantity(1)),
             ]);
 
         return Inertia::render('Home', [
