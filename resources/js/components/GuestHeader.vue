@@ -32,7 +32,7 @@ const { itemCount, openCart } = useCart();
                     <span class="text-white font-bold text-base leading-none">L</span>
                 </div>
                 <span class="font-bold text-xl tracking-tight text-gray-900 group-hover:text-rose-600 transition-colors">
-                    Lulu T Creates
+                    <span class="[word-spacing:-2px]">Lulu T</span> Creates
                 </span>
             </Link>
 
