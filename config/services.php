@@ -40,4 +40,8 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'printful' => [
+        'key' => env('PRINTFUL_API_KEY'),
+    ],
+
 ];

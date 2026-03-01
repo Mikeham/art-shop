@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use App\Jobs\SubmitOrderToPrintful;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Cart;
 use Lunar\Models\Country;
@@ -222,5 +223,7 @@ class CheckoutController extends Controller
                 $line->purchasable->decrement('stock', $line->quantity);
             }
         }
+
+        SubmitOrderToPrintful::dispatch($order);
     }
 }
