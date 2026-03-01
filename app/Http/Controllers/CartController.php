@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Lunar\Exceptions\Carts\CartException;
 use Lunar\Facades\CartSession;
@@ -9,7 +10,7 @@ use Lunar\Models\ProductVariant;
 
 class CartController extends Controller
 {
-    public function add(Request $request)
+    public function add(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'variant_id' => 'required|integer|exists:lunar_product_variants,id',
@@ -39,14 +40,14 @@ class CartController extends Controller
         return back();
     }
 
-    public function remove(int $cartLineId)
+    public function remove(int $cartLineId): RedirectResponse
     {
         CartSession::remove($cartLineId);
 
         return back();
     }
 
-    public function update(Request $request, int $cartLineId)
+    public function update(Request $request, int $cartLineId): RedirectResponse
     {
         $data = $request->validate([
             'quantity' => 'required|integer|min:1',

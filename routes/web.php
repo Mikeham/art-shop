@@ -19,17 +19,17 @@ Route::post('cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::delete('cart/lines/{cartLineId}', [CartController::class, 'remove'])->name('cart.remove');
 Route::patch('cart/lines/{cartLineId}', [CartController::class, 'update'])->name('cart.update');
 
-Route::get( 'checkout',         [CheckoutController::class, 'show']          )->name('checkout');
-Route::post('checkout/session', [CheckoutController::class, 'createSession'] )->name('checkout.session');
-Route::get( 'checkout/success', [CheckoutController::class, 'success']       )->name('checkout.success');
-Route::get( 'checkout/cancel',  [CheckoutController::class, 'cancel']        )->name('checkout.cancel');
-Route::post('stripe/webhook',   [CheckoutController::class, 'webhook']       )->name('stripe.webhook');
+Route::get('checkout', [CheckoutController::class, 'show'])->name('checkout');
+Route::post('checkout/session', [CheckoutController::class, 'createSession'])->name('checkout.session');
+Route::get('checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+Route::post('stripe/webhook', [CheckoutController::class, 'webhook'])->name('stripe.webhook');
 
 Route::get('commissions', function () {
     return Inertia::render('Commissions');
 })->name('commissions');
 
-Route::get( 'contact', [ContactController::class, 'show'])->name('contact');
+Route::get('contact', [ContactController::class, 'show'])->name('contact');
 Route::post('contact', [ContactController::class, 'send'])->name('contact.send');
 
 Route::get('dashboard', function () {

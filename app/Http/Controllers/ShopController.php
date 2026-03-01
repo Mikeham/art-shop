@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductResource;
 use Inertia\Inertia;
+use Inertia\Response;
 use Lunar\Models\Product;
 
 class ShopController extends Controller
 {
-    public function list()
+    public function list(): Response
     {
         $products = Product::status('published')
             ->with(['defaultUrl', 'thumbnail', 'variants.prices.currency'])
@@ -19,7 +20,7 @@ class ShopController extends Controller
         ]);
     }
 
-    public function show(string $slug)
+    public function show(string $slug): Response
     {
         $product = Product::whereHas('urls', fn ($q) => $q->where('slug', $slug)->where('default', true))
             ->with(['defaultUrl', 'thumbnail', 'media', 'variants.prices.currency', 'variants.values.option'])

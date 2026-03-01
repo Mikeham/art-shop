@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Cart;
 use Lunar\Models\Country;
+use Lunar\Models\ProductVariant;
 use Lunar\Models\Transaction;
+use Stripe\Checkout\Session as CheckoutSession;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\Stripe;
+use Stripe\Webhook;
+use UnexpectedValueException;
 
 class CheckoutController extends Controller
 {
-    public function show()
+    public function show(): RedirectResponse|InertiaResponse
     {
         $cart = CartSession::current(calculate: false);
 
@@ -23,7 +31,7 @@ class CheckoutController extends Controller
         return Inertia::render('Checkout');
     }
 
-    public function createSession(Request $request)
+    public function createSession(Request $request): RedirectResponse|Response
     {
         $data = $request->validate([
             'email'      => 'required|email',
@@ -60,7 +68,7 @@ class CheckoutController extends Controller
 
         $cart = CartSession::current();
 
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         $currency = strtolower($cart->currency->code);
 
@@ -81,7 +89,7 @@ class CheckoutController extends Controller
             ];
         })->values()->all();
 
-        $session = \Stripe\Checkout\Session::create([
+        $session = CheckoutSession::create([
             'mode'           => 'payment',
             'line_items'     => $lineItems,
             'customer_email' => $data['email'],
@@ -93,7 +101,7 @@ class CheckoutController extends Controller
         return Inertia::location($session->url);
     }
 
-    public function success(Request $request)
+    public function success(Request $request): RedirectResponse|InertiaResponse
     {
         $sessionId = $request->query('session_id');
 
@@ -101,9 +109,9 @@ class CheckoutController extends Controller
             return redirect('/checkout')->withErrors(['checkout' => 'Missing session ID.']);
         }
 
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
-        $session = \Stripe\Checkout\Session::retrieve([
+        $session = CheckoutSession::retrieve([
             'id'     => $sessionId,
             'expand' => ['payment_intent'],
         ]);
@@ -134,36 +142,42 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function cancel()
+    public function cancel(): RedirectResponse
     {
         return redirect('/shop');
     }
 
-    public function webhook(Request $request)
+    public function webhook(Request $request): Response
     {
         $payload = $request->getContent();
         $sig     = $request->header('Stripe-Signature');
 
+        if (! is_string($sig)) {
+            return response('Missing signature', 400);
+        }
+
         try {
-            $event = \Stripe\Webhook::constructEvent(
+            $event = Webhook::constructEvent(
                 $payload,
                 $sig,
                 config('services.stripe.webhook_secret')
             );
-        } catch (SignatureVerificationException $e) {
+        } catch (SignatureVerificationException) {
             return response('Invalid signature', 400);
-        } catch (\UnexpectedValueException $e) {
+        } catch (UnexpectedValueException) {
             return response('Invalid payload', 400);
         }
 
         if ($event->type === 'checkout.session.completed') {
-            $this->handlePaymentSuccess($event->data->object);
+            /** @var CheckoutSession $session */
+            $session = $event->data->object;
+            $this->handlePaymentSuccess($session);
         }
 
         return response('OK', 200);
     }
 
-    private function handlePaymentSuccess(\Stripe\Checkout\Session $session): void
+    private function handlePaymentSuccess(CheckoutSession $session): void
     {
         $paymentIntentId = is_string($session->payment_intent)
             ? $session->payment_intent
@@ -200,7 +214,7 @@ class CheckoutController extends Controller
         ]);
 
         foreach ($order->lines as $line) {
-            if ($line->purchasable instanceof \Lunar\Models\ProductVariant) {
+            if ($line->purchasable instanceof ProductVariant) {
                 $line->purchasable->decrement('stock', $line->quantity);
             }
         }

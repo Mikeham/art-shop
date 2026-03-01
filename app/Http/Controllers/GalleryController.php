@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 use Lunar\Models\Product;
 
 class GalleryController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $products = Product::status('published')->with(['thumbnail', 'media'])->get();
 
