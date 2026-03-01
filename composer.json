@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
         "lunarphp/lunar": "^1.0",
+        "lunarphp/table-rate-shipping": "^1.0",
         "meilisearch/meilisearch-php": "^1.16",
         "stripe/stripe-php": "^19.4"
     },

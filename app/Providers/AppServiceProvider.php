@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\PaymentTypes\StripePayment;
 use Illuminate\Support\ServiceProvider;
 use Lunar\Admin\Support\Facades\LunarPanel;
+use Lunar\Shipping\ShippingPlugin;
 use Lunar\Facades\Payments;
 use Lunar\Facades\Telemetry;
 
@@ -15,7 +16,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        LunarPanel::register();
+        LunarPanel::panel(fn ($panel) => $panel->plugin(ShippingPlugin::make()))
+            ->register();
     }
 
     /**

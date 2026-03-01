@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import GuestFooter from '@/components/GuestFooter.vue';
 import GuestLayout from '@/layouts/GuestLayout.vue';
-import type { AppPageProps, CartLine } from '@/types';
+import type { AppPageProps, CartLine, ShippingOption } from '@/types';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const page = usePage<AppPageProps>();
 const cart = computed(() => page.props.cart);
 const errors = computed(() => page.props.errors as Record<string, string>);
+const step = computed(() => page.props.step ?? 'address');
+const shippingOptions = computed(() => page.props.shippingOptions ?? []);
+const countries = computed(() => page.props.countries ?? []);
 
 const form = ref({
     email: '',
@@ -20,32 +23,29 @@ const form = ref({
     country: 'GB',
 });
 
+const selectedShipping = ref('');
 const redirecting = ref(false);
 
-const countries = [
-    { code: 'GB', name: 'United Kingdom' },
-    { code: 'US', name: 'United States' },
-    { code: 'CA', name: 'Canada' },
-    { code: 'AU', name: 'Australia' },
-    { code: 'DE', name: 'Germany' },
-    { code: 'FR', name: 'France' },
-    { code: 'NL', name: 'Netherlands' },
-    { code: 'IE', name: 'Ireland' },
-    { code: 'NZ', name: 'New Zealand' },
-];
+function submitAddress() {
+    router.post('/checkout/address', form.value, { preserveScroll: true });
+}
 
-function submit() {
+function submitShipping() {
     redirecting.value = true;
-    router.post('/checkout/session', form.value, {
-        onFinish: () => {
-            redirecting.value = false;
-        },
-    });
+    router.post(
+        '/checkout/session',
+        { shipping_option: selectedShipping.value },
+        { onFinish: () => { redirecting.value = false; } },
+    );
 }
 
 function lineImage(line: CartLine): string | null {
     return line.image ?? null;
 }
+
+const selectedOption = computed<ShippingOption | undefined>(() =>
+    shippingOptions.value.find((o) => o.identifier === selectedShipping.value),
+);
 
 const inputClass =
     'w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 transition bg-white';
@@ -80,106 +80,155 @@ const errorClass = 'mt-1 text-xs text-red-500';
                 </div>
 
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                    <!-- Address form -->
+                    <!-- Left card: address form or shipping selection -->
                     <div class="rounded-2xl bg-white p-8 shadow-sm">
-                        <h2 class="mb-6 text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Billing &amp; Shipping</h2>
 
-                        <form @submit.prevent="submit" class="space-y-4">
-                            <!-- Email -->
-                            <div>
-                                <label :class="labelClass">Email</label>
-                                <input
-                                    v-model="form.email"
-                                    type="email"
-                                    required
-                                    placeholder="jane@example.com"
-                                    :class="[inputClass, errors.email ? 'border-red-400' : '']"
-                                />
-                                <p v-if="errors.email" :class="errorClass">{{ errors.email }}</p>
-                            </div>
+                        <!-- Step 1: Address form -->
+                        <template v-if="step === 'address'">
+                            <h2 class="mb-6 text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Billing &amp; Shipping</h2>
 
-                            <!-- Name -->
-                            <div class="grid grid-cols-2 gap-3">
+                            <form @submit.prevent="submitAddress" class="space-y-4">
+                                <!-- Email -->
                                 <div>
-                                    <label :class="labelClass">First name</label>
+                                    <label :class="labelClass">Email</label>
                                     <input
-                                        v-model="form.first_name"
-                                        type="text"
+                                        v-model="form.email"
+                                        type="email"
                                         required
-                                        :class="[inputClass, errors.first_name ? 'border-red-400' : '']"
+                                        placeholder="jane@example.com"
+                                        :class="[inputClass, errors.email ? 'border-red-400' : '']"
                                     />
-                                    <p v-if="errors.first_name" :class="errorClass">{{ errors.first_name }}</p>
+                                    <p v-if="errors.email" :class="errorClass">{{ errors.email }}</p>
                                 </div>
+
+                                <!-- Name -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label :class="labelClass">First name</label>
+                                        <input
+                                            v-model="form.first_name"
+                                            type="text"
+                                            required
+                                            :class="[inputClass, errors.first_name ? 'border-red-400' : '']"
+                                        />
+                                        <p v-if="errors.first_name" :class="errorClass">{{ errors.first_name }}</p>
+                                    </div>
+                                    <div>
+                                        <label :class="labelClass">Last name</label>
+                                        <input
+                                            v-model="form.last_name"
+                                            type="text"
+                                            required
+                                            :class="[inputClass, errors.last_name ? 'border-red-400' : '']"
+                                        />
+                                        <p v-if="errors.last_name" :class="errorClass">{{ errors.last_name }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Phone -->
                                 <div>
-                                    <label :class="labelClass">Last name</label>
+                                    <label :class="labelClass">Phone number</label>
                                     <input
-                                        v-model="form.last_name"
-                                        type="text"
+                                        v-model="form.phone"
+                                        type="tel"
                                         required
-                                        :class="[inputClass, errors.last_name ? 'border-red-400' : '']"
+                                        placeholder="+44 7700 900000"
+                                        :class="[inputClass, errors.phone ? 'border-red-400' : '']"
                                     />
-                                    <p v-if="errors.last_name" :class="errorClass">{{ errors.last_name }}</p>
+                                    <p v-if="errors.phone" :class="errorClass">{{ errors.phone }}</p>
                                 </div>
-                            </div>
 
-                            <!-- Phone -->
-                            <div>
-                                <label :class="labelClass">Phone number</label>
-                                <input
-                                    v-model="form.phone"
-                                    type="tel"
-                                    required
-                                    placeholder="+44 7700 900000"
-                                    :class="[inputClass, errors.phone ? 'border-red-400' : '']"
-                                />
-                                <p v-if="errors.phone" :class="errorClass">{{ errors.phone }}</p>
-                            </div>
-
-                            <!-- Address -->
-                            <div>
-                                <label :class="labelClass">Address</label>
-                                <input v-model="form.line_one" type="text" required :class="[inputClass, errors.line_one ? 'border-red-400' : '']" />
-                                <p v-if="errors.line_one" :class="errorClass">{{ errors.line_one }}</p>
-                            </div>
-
-                            <!-- City + Postcode -->
-                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Address -->
                                 <div>
-                                    <label :class="labelClass">City</label>
-                                    <input v-model="form.city" type="text" required :class="[inputClass, errors.city ? 'border-red-400' : '']" />
-                                    <p v-if="errors.city" :class="errorClass">{{ errors.city }}</p>
+                                    <label :class="labelClass">Address</label>
+                                    <input v-model="form.line_one" type="text" required :class="[inputClass, errors.line_one ? 'border-red-400' : '']" />
+                                    <p v-if="errors.line_one" :class="errorClass">{{ errors.line_one }}</p>
                                 </div>
+
+                                <!-- City + Postcode -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label :class="labelClass">City</label>
+                                        <input v-model="form.city" type="text" required :class="[inputClass, errors.city ? 'border-red-400' : '']" />
+                                        <p v-if="errors.city" :class="errorClass">{{ errors.city }}</p>
+                                    </div>
+                                    <div>
+                                        <label :class="labelClass">Postcode</label>
+                                        <input
+                                            v-model="form.postcode"
+                                            type="text"
+                                            required
+                                            :class="[inputClass, errors.postcode ? 'border-red-400' : '']"
+                                        />
+                                        <p v-if="errors.postcode" :class="errorClass">{{ errors.postcode }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Country -->
                                 <div>
-                                    <label :class="labelClass">Postcode</label>
+                                    <label :class="labelClass">Country</label>
+                                    <select v-model="form.country" :class="[inputClass, errors.country ? 'border-red-400' : '']">
+                                        <option v-for="c in countries" :key="c.code" :value="c.code">{{ c.name }}</option>
+                                    </select>
+                                    <p v-if="errors.country" :class="errorClass">{{ errors.country }}</p>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="mt-2 w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                                    style="background: linear-gradient(135deg, #6b2737, #c46b72)"
+                                >
+                                    Continue to Shipping &rarr;
+                                </button>
+                            </form>
+                        </template>
+
+                        <!-- Step 2: Shipping selection -->
+                        <template v-else-if="step === 'shipping'">
+                            <h2 class="mb-6 text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Shipping Method</h2>
+
+                            <div class="space-y-3">
+                                <label
+                                    v-for="option in shippingOptions"
+                                    :key="option.identifier"
+                                    class="flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition"
+                                    :class="selectedShipping === option.identifier
+                                        ? 'border-rose-400 bg-rose-50'
+                                        : 'border-gray-200 hover:border-rose-200'"
+                                >
                                     <input
-                                        v-model="form.postcode"
-                                        type="text"
-                                        required
-                                        :class="[inputClass, errors.postcode ? 'border-red-400' : '']"
+                                        type="radio"
+                                        v-model="selectedShipping"
+                                        :value="option.identifier"
+                                        class="mt-0.5 accent-rose-500"
                                     />
-                                    <p v-if="errors.postcode" :class="errorClass">{{ errors.postcode }}</p>
-                                </div>
-                            </div>
-
-                            <!-- Country -->
-                            <div>
-                                <label :class="labelClass">Country</label>
-                                <select v-model="form.country" :class="[inputClass, errors.country ? 'border-red-400' : '']">
-                                    <option v-for="c in countries" :key="c.code" :value="c.code">{{ c.name }}</option>
-                                </select>
-                                <p v-if="errors.country" :class="errorClass">{{ errors.country }}</p>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold text-gray-900">{{ option.name }}</p>
+                                        <p v-if="option.description" class="mt-0.5 text-xs text-gray-500">{{ option.description }}</p>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900">{{ option.price }}</span>
+                                </label>
                             </div>
 
                             <button
-                                type="submit"
-                                :disabled="redirecting"
-                                class="mt-2 w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity"
-                                :class="redirecting ? 'cursor-not-allowed opacity-50' : 'hover:opacity-85'"
+                                type="button"
+                                :disabled="!selectedShipping || redirecting"
+                                @click="submitShipping"
+                                class="mt-6 w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity"
+                                :class="(!selectedShipping || redirecting) ? 'cursor-not-allowed opacity-50' : 'hover:opacity-85'"
                                 style="background: linear-gradient(135deg, #6b2737, #c46b72)"
                             >
-                                {{ redirecting ? 'Redirecting…' : 'Pay with Stripe →' }}
+                                {{ redirecting ? 'Redirecting…' : 'Confirm & Pay with Stripe →' }}
                             </button>
-                        </form>
+
+                            <button
+                                type="button"
+                                onclick="history.back()"
+                                class="mt-4 w-full text-center text-xs text-gray-400 transition-colors hover:text-gray-700"
+                            >
+                                &larr; Back to address
+                            </button>
+                        </template>
                     </div>
 
                     <!-- Order summary -->
@@ -208,6 +257,12 @@ const errorClass = 'mt-1 text-xs text-red-500';
                                 </li>
                             </ul>
 
+                            <!-- Shipping line (shown when option selected) -->
+                            <div v-if="selectedOption" class="mt-3 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+                                <span class="text-sm text-gray-500">{{ selectedOption.name }}</span>
+                                <span class="text-sm font-bold text-gray-900">{{ selectedOption.price }}</span>
+                            </div>
+
                             <div class="mt-6 flex items-center justify-between border-t pt-4">
                                 <span class="text-sm text-gray-500">Total</span>
                                 <span class="text-lg font-bold text-gray-900">{{ cart.total }}</span>
@@ -216,7 +271,11 @@ const errorClass = 'mt-1 text-xs text-red-500';
 
                         <div v-else class="py-8 text-center text-sm text-gray-400">Your cart is empty.</div>
 
-                        <button onclick="history.back()" class="mt-6 text-center text-xs text-gray-400 transition-colors hover:text-gray-700">
+                        <button
+                            v-if="step === 'address'"
+                            onclick="history.back()"
+                            class="mt-6 text-center text-xs text-gray-400 transition-colors hover:text-gray-700"
+                        >
                             &larr; Edit cart
                         </button>
                     </div>

@@ -20,6 +20,7 @@ Route::delete('cart/lines/{cartLineId}', [CartController::class, 'remove'])->nam
 Route::patch('cart/lines/{cartLineId}', [CartController::class, 'update'])->name('cart.update');
 
 Route::get('checkout', [CheckoutController::class, 'show'])->name('checkout');
+Route::post('checkout/address', [CheckoutController::class, 'saveAddress'])->name('checkout.address');
 Route::post('checkout/session', [CheckoutController::class, 'createSession'])->name('checkout.session');
 Route::get('checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 Route::get('checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');

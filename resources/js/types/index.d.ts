@@ -33,12 +33,23 @@ export interface CartData {
     lines: CartLine[];
 }
 
+export interface ShippingOption {
+    identifier: string;
+    name: string;
+    description: string | null;
+    price: string;
+    price_value: number;
+}
+
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
     cart: CartData | null;
+    step?: 'address' | 'shipping';
+    shippingOptions?: ShippingOption[];
+    countries?: { code: string; name: string }[];
 };
 
 export interface User {

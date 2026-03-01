@@ -8,10 +8,13 @@ use Illuminate\Http\Response;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Lunar\Actions\Carts\SetShippingOption;
 use Lunar\Facades\CartSession;
+use Lunar\Facades\ShippingManifest;
 use Lunar\Models\Cart;
 use Lunar\Models\Country;
 use Lunar\Models\ProductVariant;
+use Lunar\Shipping\Models\ShippingZone;
 use Lunar\Models\Transaction;
 use Stripe\Checkout\Session as CheckoutSession;
 use Stripe\Exception\SignatureVerificationException;
@@ -29,10 +32,30 @@ class CheckoutController extends Controller
             return redirect('/shop');
         }
 
-        return Inertia::render('Checkout');
+        $countries = ShippingZone::whereHas('rates')
+            ->with('countries:id,name,iso2')
+            ->get()
+            ->flatMap(fn ($zone) => $zone->countries)
+            ->unique('id')
+            ->sortBy('name')
+            ->map(fn ($c) => ['code' => $c->iso2, 'name' => $c->name])
+            ->values()
+            ->all();
+
+        $shippingOptions = session('shipping_options');
+
+        if ($shippingOptions) {
+            return Inertia::render('Checkout', [
+                'step'            => 'shipping',
+                'shippingOptions' => $shippingOptions,
+                'countries'       => $countries,
+            ]);
+        }
+
+        return Inertia::render('Checkout', ['countries' => $countries]);
     }
 
-    public function createSession(Request $request): SymfonyResponse
+    public function saveAddress(Request $request): RedirectResponse|InertiaResponse
     {
         $data = $request->validate([
             'email'      => 'required|email',
@@ -67,6 +90,47 @@ class CheckoutController extends Controller
         $cart->addAddress($addressData, 'billing');
         $cart->addAddress($addressData, 'shipping');
 
+        $options = ShippingManifest::getOptions($cart);
+
+        if ($options->isEmpty()) {
+            return back()->withErrors(['checkout' => 'No shipping options are available for your address.']);
+        }
+
+        $serialized = $options->map(fn ($option) => [
+            'identifier'  => $option->getIdentifier(),
+            'name'        => $option->getName(),
+            'description' => $option->getDescription() ? strip_tags($option->getDescription()) : null,
+            'price'       => $option->price->formatted(),
+            'price_value' => $option->price->value,
+        ])->values()->all();
+
+        session()->put('shipping_options', $serialized);
+
+        return redirect()->route('checkout');
+    }
+
+    public function createSession(Request $request): SymfonyResponse
+    {
+        $data = $request->validate([
+            'shipping_option' => 'required|string',
+        ]);
+
+        $cart = CartSession::current(calculate: false);
+
+        if (! $cart || $cart->lines->isEmpty()) {
+            return redirect('/shop');
+        }
+
+        $option = ShippingManifest::getOption($cart, $data['shipping_option']);
+
+        if (! $option) {
+            return back()->withErrors(['checkout' => 'The selected shipping option is no longer available.']);
+        }
+
+        app(SetShippingOption::class)->execute($cart, $option);
+
+        session()->forget('shipping_options');
+
         $cart = CartSession::current();
 
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -75,9 +139,9 @@ class CheckoutController extends Controller
 
         $lineItems = $cart->lines->map(function ($line) use ($currency) {
             $name = $line->purchasable->product->translateAttribute('name');
-            $option = $line->purchasable->getOption();
-            if ($option) {
-                $name .= ' — ' . $option;
+            $variantOption = $line->purchasable->getOption();
+            if ($variantOption) {
+                $name .= ' — ' . $variantOption;
             }
 
             return [
@@ -90,10 +154,23 @@ class CheckoutController extends Controller
             ];
         })->values()->all();
 
+        if (($cart->shippingTotal?->value ?? 0) > 0) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency'     => $currency,
+                    'product_data' => ['name' => 'Shipping'],
+                    'unit_amount'  => $cart->shippingTotal?->value ?? 0,
+                ],
+                'quantity' => 1,
+            ];
+        }
+
+        $billingEmail = $cart->billingAddress?->contact_email ?? '';
+
         $session = CheckoutSession::create([
             'mode'           => 'payment',
             'line_items'     => $lineItems,
-            'customer_email' => $data['email'],
+            'customer_email' => $billingEmail,
             'metadata'       => ['cart_id' => $cart->id],
             'success_url'    => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url'     => route('checkout.cancel'),
