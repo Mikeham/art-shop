@@ -17,7 +17,7 @@ class ContactFormMail extends Mailable
     public function __construct(
         public readonly string $senderName,
         public readonly string $senderEmail,
-        public readonly string $subject,
+        public readonly string $mailSubject,
         public readonly string $messageBody,
     ) {
     }
@@ -25,7 +25,7 @@ class ContactFormMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Contact: ' . $this->subject,
+            subject: 'Contact: ' . $this->mailSubject,
             replyTo: new Address($this->senderEmail, $this->senderName),
         );
     }

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Cart;
 use Lunar\Models\Country;
@@ -31,7 +32,7 @@ class CheckoutController extends Controller
         return Inertia::render('Checkout');
     }
 
-    public function createSession(Request $request): RedirectResponse|Response
+    public function createSession(Request $request): SymfonyResponse
     {
         $data = $request->validate([
             'email'      => 'required|email',
@@ -202,11 +203,14 @@ class CheckoutController extends Controller
             'placed_at' => now(),
         ]);
 
+        /** @var \Lunar\DataTypes\Price $orderTotal */
+        $orderTotal = $order->total;
+
         $order->transactions()->create([
             'success'   => true,
             'type'      => 'capture',
             'driver'    => 'stripe',
-            'amount'    => $order->total->value,
+            'amount'    => $orderTotal->value,
             'reference' => $paymentIntentId,
             'status'    => 'succeeded',
             'card_type' => 'card',

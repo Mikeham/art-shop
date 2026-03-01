@@ -29,7 +29,7 @@ class ContactController extends Controller
             ->send(new ContactFormMail(
                 senderName:  $data['name'],
                 senderEmail: $data['email'],
-                subject:     $data['subject'],
+                mailSubject: $data['subject'],
                 messageBody: $data['message'],
             ));
 
