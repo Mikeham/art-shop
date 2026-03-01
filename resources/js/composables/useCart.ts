@@ -8,15 +8,25 @@ export function useCart() {
     const cart = computed(() => usePage<AppPageProps>().props.cart);
     const itemCount = computed(() => cart.value?.item_count ?? 0);
 
-    function openCart() { cartOpen.value = true; }
-    function closeCart() { cartOpen.value = false; }
+    function openCart() {
+        cartOpen.value = true;
+    }
+    function closeCart() {
+        cartOpen.value = false;
+    }
 
     function addToCart(variantId: number, quantity = 1, onFinish?: () => void) {
-        router.post('/cart/add', { variant_id: variantId, quantity }, {
-            preserveScroll: true,
-            onSuccess: () => { cartOpen.value = true; },
-            onFinish,
-        });
+        router.post(
+            '/cart/add',
+            { variant_id: variantId, quantity },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    cartOpen.value = true;
+                },
+                onFinish,
+            },
+        );
     }
 
     function removeFromCart(cartLineId: number) {

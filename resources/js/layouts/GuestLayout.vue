@@ -2,13 +2,11 @@
 import CartModal from '@/components/CartModal.vue';
 import GuestHeader from '@/components/GuestHeader.vue';
 
-
 defineProps<{
     title?: string;
     description?: string;
     fullWidth?: boolean;
 }>();
-
 </script>
 
 <template>

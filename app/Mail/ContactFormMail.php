@@ -10,14 +10,16 @@ use Illuminate\Queue\SerializesModels;
 
 class ContactFormMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(
         public readonly string $senderName,
         public readonly string $senderEmail,
         public readonly string $subject,
         public readonly string $messageBody,
-    ) {}
+    ) {
+    }
 
     public function envelope(): Envelope
     {
