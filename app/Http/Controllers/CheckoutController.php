@@ -29,6 +29,7 @@ class CheckoutController extends Controller
             'email'      => 'required|email',
             'first_name' => 'required|string',
             'last_name'  => 'required|string',
+            'phone'      => 'required|string|max:30',
             'line_one'   => 'required|string',
             'city'       => 'required|string',
             'postcode'   => 'required|string',
@@ -46,6 +47,7 @@ class CheckoutController extends Controller
         $addressData = [
             'first_name'    => $data['first_name'],
             'last_name'     => $data['last_name'],
+            'contact_phone' => $data['phone'],
             'line_one'      => $data['line_one'],
             'city'          => $data['city'],
             'postcode'      => $data['postcode'],

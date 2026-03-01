@@ -92,9 +92,7 @@ function onKey(e: KeyboardEvent) {
                         <div class="w-1/2 flex flex-col justify-between p-5">
                             <div>
                                 <p class="font-semibold text-gray-900 text-base mb-2">{{ product.name }}</p>
-                                <p v-if="product.description" class="text-sm text-gray-500 leading-relaxed line-clamp-4">
-                                    {{ product.description }}
-                                </p>
+                                <div v-if="product.description" class="text-sm text-gray-500 leading-relaxed line-clamp-4" v-html="product.description" />
                             </div>
                             <span class="text-xs text-gray-400 mt-3">
                                 {{ product.images.length }} {{ product.images.length === 1 ? 'photo' : 'photos' }} — click to view
